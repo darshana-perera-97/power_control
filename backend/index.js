@@ -1,137 +1,93 @@
-const express = require("express");
-const cors = require("cors");
-const { initializeApp } = require("firebase/app");
-const { getDatabase, ref, set, onValue } = require("firebase/database");
-const moment = require("moment-timezone");
-const bodyParser = require("body-parser");
+import React, { useState } from 'react';
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDcehMQQY6D90NIiZcLyzVQkxPys9LJzTM",
-  authDomain: "smart-power-meter-be704.firebaseapp.com",
-  databaseURL:
-    "https://smart-power-meter-be704-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "smart-power-meter-be704",
-  storageBucket: "smart-power-meter-be704.appspot.com",
-  messagingSenderId: "700492789096",
-  appId: "1:700492789096:web:c25633ccac57c7f4b252dd",
-  measurementId: "G-NQJ882NCL3",
-};
+export default function SuprAdmin() {
+  const [data1, setData1] = useState('');
+  const [data2, setData2] = useState('');
+  const [response, setResponse] = useState(null); // State to hold server response
 
-const firebaseApp = initializeApp(firebaseConfig);
-const database = getDatabase();
-
-const app = express();
-app.use(cors()); // Enable CORS for all routes
-app.use(bodyParser.json());
-
-let dataArray = [];
-let lastOnlineStatus = null;
-let data1 = null; // Global variable for data1
-let data2 = null; // Global variable for data2
-let units = 0; // Global variable for data2
-let price = 100; // Global variable for data2
-
-const fetchData = async () => {
-  try {
-    const dbRef = ref(database);
-    const snapshot = await new Promise((resolve, reject) => {
-      onValue(dbRef, resolve, { onlyOnce: true }, reject);
-    });
-    const data = snapshot.val();
-
-    if (data && data.device1.online !== lastOnlineStatus) {
-      lastOnlineStatus = data.device1.online;
-      console.log(first)
-
-      const currentDateTime = moment().tz("Asia/Colombo").format();
-
-      const responseData = {
-        data,
-        timestamp: currentDateTime,
-      };
-      units = data.device1.senergy;
-      
-      price = Number(data1) + (Number(data2) * units);
-      console.log(price)
-
-       // Send mock data to Firebase
-    const mockPath = "cost"; // Define your mock path
-    var mockData = {
-      price: price,
-    }; // Define your mock data
-    
-    await set(ref(database, mockPath), mockData); // Send mock data to Firebase
-
-      dataArray.push(responseData);
-
-      if (dataArray.length > 1000) {
-        dataArray.shift();
-      }
+  const handleData1Change = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) { // Allow only numbers
+      setData1(value);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-};
+  };
 
-setInterval(fetchData, 1000);
+  const handleData2Change = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) { // Allow only numbers
+      setData2(value);
+    }
+  };
 
-app.get("/data", async (req, res) => {
-  try {
-    const dbRef = ref(database);
-    const snapshot = await new Promise((resolve, reject) => {
-      onValue(dbRef, resolve, { onlyOnce: true }, reject);
-    });
-    const data = snapshot.val();
-
-    const currentDateTime = moment().tz("Asia/Colombo").format();
-
-    const responseData = {
-      data,
-      timestamp: currentDateTime,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      data1: data1,
+      data2: data2
     };
 
-    res.json(responseData);
-    console.log(responseData);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+    try {
+      const response = await fetch('https://power-control-backend.onrender.com/setCost', {
+      // const response = await fetch('http://localhost:3002/setCost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
 
-app.get("/dataset", (req, res) => {
-  res.json(dataArray);
-});
+      const result = await response.json();
+      setResponse(result); // Store server response
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
-app.post("/setCost", (req, res) => {
-  const { data1: newData1, data2: newData2 } = req.body;
+  return (
+    <Container>
+      <h1>SuprAdmin</h1>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group as={Row} className="mb-3" controlId="formData1">
+          <Form.Label column sm="2">
+            Data 1
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data1} 
+              onChange={handleData1Change} 
+              placeholder="Enter Data 1" 
+            />
+          </Col>
+        </Form.Group>
 
-  console.log("Received data to set:", { newData1, newData2 });
+        <Form.Group as={Row} className="mb-3" controlId="formData2">
+          <Form.Label column sm="2">
+            Data 2
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data2} 
+              onChange={handleData2Change} 
+              placeholder="Enter Data 2" 
+            />
+          </Col>
+        </Form.Group>
 
-  data1 = newData1; // Update global data1
-  data2 = newData2; // Update global data2
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
 
-  res.json({ success: true, message: "Cost data updated successfully" });
-});
-
-// Get Cost API
-app.get("/getCost", (req, res) => {
-  if (data1 === undefined || data2 === undefined) {
-    return res.status(400).json({ success: false, message: "Cost data not set" });
-  }
-
-  const result = Number(data1) + (Number(data2) * units);
-
-  console.log("Calculated result:", result);
-
-  res.json({ success: true, result });
-});
-
-// Endpoint to get global data1 and data2
-app.get("/globalData", (req, res) => {
-  res.json({ data1, data2 });
-});
-
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+      {response && (
+        <div>
+          <h2>Server Response:</h2>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+    </Container>
+  );
+}
