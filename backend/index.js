@@ -26,9 +26,9 @@ app.use(bodyParser.json());
 
 let dataArray = [];
 let lastOnlineStatus = null;
-let data1 = null; // Global variable for data1
-let data2 = null; // Global variable for data2
-let units = 0; // Global variable for data2
+let data1 = 1; // Global variable for data1
+let data2 = 1; // Global variable for data2
+let units = 1; // Global variable for data2
 let price = 100; // Global variable for data2
 
 const fetchData = async () => {
@@ -41,7 +41,7 @@ const fetchData = async () => {
 
     if (data && data.device1.online !== lastOnlineStatus) {
       lastOnlineStatus = data.device1.online;
-      console.log(first)
+      // console.log(first)
 
       const currentDateTime = moment().tz("Asia/Colombo").format();
 
@@ -50,17 +50,17 @@ const fetchData = async () => {
         timestamp: currentDateTime,
       };
       units = data.device1.senergy;
-      
-      price = Number(data1) + (Number(data2) * units);
-      console.log(price)
 
-       // Send mock data to Firebase
-    const mockPath = "cost"; // Define your mock path
-    var mockData = {
-      price: price,
-    }; // Define your mock data
-    
-    await set(ref(database, mockPath), mockData); // Send mock data to Firebase
+      price = Number(data1) + Number(data2) * units;
+      console.log(price);
+
+      // Send mock data to Firebase
+      const mockPath = "cost"; // Define your mock path
+      var mockData = {
+        price: price,
+      }; // Define your mock data
+
+      await set(ref(database, mockPath), mockData); // Send mock data to Firebase
 
       dataArray.push(responseData);
 
@@ -91,7 +91,7 @@ app.get("/data", async (req, res) => {
     };
 
     res.json(responseData);
-    console.log(responseData);
+    // console.log(responseData);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -116,10 +116,12 @@ app.post("/setCost", (req, res) => {
 // Get Cost API
 app.get("/getCost", (req, res) => {
   if (data1 === undefined || data2 === undefined) {
-    return res.status(400).json({ success: false, message: "Cost data not set" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Cost data not set" });
   }
 
-  const result = Number(data1) + (Number(data2) * units);
+  const result = Number(data1) + Number(data2) * units;
 
   console.log("Calculated result:", result);
 
