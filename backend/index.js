@@ -1,3 +1,4 @@
+<<<<<<< main
 const express = require("express");
 const cors = require("cors");
 const { initializeApp } = require("firebase/app");
@@ -101,13 +102,14 @@ app.get("/data", async (req, res) => {
       onValue(dbRef, resolve, { onlyOnce: true }, reject);
     });
     const data = snapshot.val();
+
     const currentDateTime = moment().tz("Asia/Colombo").format();
 
     const responseData = {
       data,
       timestamp: currentDateTime,
     };
-    console.log(responseData);
+
     res.json(responseData);
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -190,3 +192,68 @@ const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+=======
+    try {
+      const response = await fetch('https://power-control-backend.onrender.com/setCost', {
+      // const response = await fetch('http://localhost:3002/setCost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      setResponse(result); // Store server response
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <Container>
+      <h1>SuprAdmin</h1>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group as={Row} className="mb-3" controlId="formData1">
+          <Form.Label column sm="2">
+            Data 1
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data1} 
+              onChange={handleData1Change} 
+              placeholder="Enter Data 1" 
+            />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="formData2">
+          <Form.Label column sm="2">
+            Data 2
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data2} 
+              onChange={handleData2Change} 
+              placeholder="Enter Data 2" 
+            />
+          </Col>
+        </Form.Group>
+
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
+
+      {response && (
+        <div>
+          <h2>Server Response:</h2>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+    </Container>
+  );
+}
+>>>>>>> main
