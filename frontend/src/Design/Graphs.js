@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import config from "./config"; // Import the config file
 
 const Graphs = () => {
   const [chartDataVoltage, setChartDataVoltage] = useState({});
@@ -13,9 +14,7 @@ const Graphs = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3002/dataset"
-      );
+      const response = await fetch(`${config.apiUrl}dataset`); // Use base URL from config
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -179,7 +178,7 @@ const Graphs = () => {
           <h4 className="title mt-4">Bill Amount (LKR)</h4>
           <Line data={chartDataCost} options={options} />
         </div>
-      </div> 
+      </div>
     </div>
   );
 };

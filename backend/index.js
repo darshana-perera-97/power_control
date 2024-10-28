@@ -101,14 +101,13 @@ app.get("/data", async (req, res) => {
       onValue(dbRef, resolve, { onlyOnce: true }, reject);
     });
     const data = snapshot.val();
-
     const currentDateTime = moment().tz("Asia/Colombo").format();
 
     const responseData = {
       data,
       timestamp: currentDateTime,
     };
-
+    console.log(responseData);
     res.json(responseData);
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -187,7 +186,7 @@ app.post("/setValue", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
