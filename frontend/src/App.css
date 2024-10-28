@@ -32,12 +32,161 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 .card-title {
-  font-size: 2em; /* Adjust the font size as needed */
+  font-size: 2em;
+  /* Adjust the font size as needed */
 }
 
+.card {
+  border-radius: 20px;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #D8E1FF;
+}
+
+.login-text {
+  color: rgb(0, 58, 105);
+}
+
+
+.login-text h4 {
+  font-weight: 200;
+  font-size: larger;
+  margin-bottom: 0px;
+}
+
+.custombtn {
+  background: rgb(0, 58, 105);
+  color: #ffffff;
+  padding: 10px 25px;
+}
+
+.custombtn:hover {
+  background: rgb(0, 36, 65);
+  color: #ffffff;
+}
+
+.login-container .form-control {
+  border: 1PX SOLID rgba(0, 36, 65, 0.233);
+  padding: 10px 25px;
+}
+
+.customCard {
+  background-color: #ffffff;
+  border-radius: 40px;
+}
+
+.mainBack {
+  background: #D8E1FF;
+  height: 100vh;
+}
+
+.mainBack2 {
+  background: #D8E1FF;
+}
+
+.title {
+  color: rgb(0, 58, 105);
+}
+
+.main-title {
+  color: rgb(0, 58, 105);
+  font-weight: 700;
+}
+
+.subtitle {
+  color: rgb(0, 58, 105);
+  font-weight: 400;
+  opacity: 70%;
+}
+
+.superAdmin th,
+.superAdmin td {
+  color: rgb(0, 58, 105);
+}
+
+.superAdmin .form-control,
+.superAdmin .form-control:active {
+  border: 0PX SOLID rgba(0, 36, 65, 0.233);
+  box-shadow: none;
+}
+
+.tableBack {
+  background: #d8e1ff98 !important;
+}
+
+.tableBack2 {
+  background: #d8e1ff3f !important;
+}
+
+.dashboard-card {
+  box-shadow: 0px 0px 5px #282c3459;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0px 0px 5px #282c34dc;
+  cursor: pointer;
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.6;
+  }
+
+  40% {
+    opacity: 1.0;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.glow {
+  animation: glow 2.5s infinite;
+}
+
+.card-grid-power-lost {
+  box-shadow: 0px 0px 5px #ff0000;
+  animation: zoomInOut 1s ease infinite alternate;
+}
+
+@keyframes zoomInOut {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.card-grid-power-lost .title {
+  color: #ff0000;
+}
+
+.billCard {
+  background: #d8e1ff98 !important;
+  border-radius: 10px;
+}
+
+.custom-link {
+  color: rgb(0, 58, 105);
+  text-decoration: none;
+  font-weight: 600;
+}
