@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 import Graphs from "./Graphs";
 import loginAsset from "../Asset/loginAsset.png";
+import config from "./config"; // Import config
 
 const Design = () => {
   const [deviceStatus, setDeviceStatus] = useState("not set");
@@ -39,9 +40,7 @@ const Design = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3002/data"
-        );
+        const response = await fetch(`${config.apiUrl}data`);
         const result = await response.json();
 
         setCost("Rs." + result.data.cost.price.toFixed(2));
@@ -66,7 +65,9 @@ const Design = () => {
             ? "Grid Power Available"
             : "Grid Power Lost"
         );
-        setDeviceStatus(result.state);
+        setDeviceStatus(result.state ? "Online" : "Offline");
+        // setDeviceStatus("result.state");
+        // setDeviceStatus(result.state);
         setTgas(
           result.data.device1.gasState > 84 ? "Gas Emission" : "No Gas Emission"
         );
@@ -108,16 +109,13 @@ const Design = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        "http://localhost:3002/setValue",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ value: Number(inputValue) }), // Ensure value is sent as a number
-        }
-      );
+      const response = await fetch(`${config.apiUrl}setValue`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ value: Number(inputValue) }), // Ensure value is sent as a number
+      });
 
       const result = await response.json();
       if (result.success) {

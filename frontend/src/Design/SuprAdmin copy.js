@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import config from "./config";
 
 export default function SuprAdmin() {
   const [data, setData] = useState(Array(2).fill(Array(5).fill("0"))); // Initialize a 2x5 array with "0" as default values
@@ -24,7 +25,7 @@ export default function SuprAdmin() {
     const payload = { data };
 
     try {
-      const response = await fetch("http://localhost:3002/setCost", {
+      const response = await fetch(`${config.apiUrl}setCost`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -43,7 +44,7 @@ export default function SuprAdmin() {
 
   const fetchCost = async () => {
     try {
-      const response = await fetch("http://localhost:3002/getCost");
+      const response = await fetch(`${config.apiUrl}getCost`);
       const result = await response.json();
       setCost(result); // Store fetched cost
     } catch (error) {
@@ -53,7 +54,7 @@ export default function SuprAdmin() {
 
   const fetchTableData = async () => {
     try {
-      const response = await fetch("http://localhost:3002/testCost");
+      const response = await fetch(`${config.apiUrl}testCost`);
       const result = await response.json();
       setTableData(result.tableData); // Store fetched table data
 

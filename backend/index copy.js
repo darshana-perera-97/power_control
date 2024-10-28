@@ -1,11 +1,11 @@
+<<<<<<< main
 const express = require("express");
 const cors = require("cors");
 const { initializeApp } = require("firebase/app");
 const { getDatabase, ref, set, onValue } = require("firebase/database");
 const moment = require("moment-timezone");
-const bodyParser = require("body-parser"); // Import body-parser to handle JSON payloads
+const bodyParser = require("body-parser");
 
-// Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDcehMQQY6D90NIiZcLyzVQkxPys9LJzTM",
   authDomain: "smart-power-meter-be704.firebaseapp.com",
@@ -22,62 +22,87 @@ const firebaseApp = initializeApp(firebaseConfig);
 const database = getDatabase();
 
 const app = express();
-const cors = require("cors");
-app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
+app.use(cors()); // Enable CORS for all routes
+app.use(bodyParser.json());
 
 let dataArray = [];
-let lastOnlineStatus = null; // To store the last known online status
+let lastOnlineStatus = null;
+let units = 1; // Global variable for units
+let tableData = Array(2).fill(Array(5).fill(0)); // Initialize a 2x5 array for table data
 
-// Function to fetch data from Firebase
 const fetchData = async () => {
   try {
     const dbRef = ref(database);
     const snapshot = await new Promise((resolve, reject) => {
-      onValue(dbRef, resolve, { onlyOnce: true }, reject); // Listen for changes and resolve the promise
+      onValue(dbRef, resolve, { onlyOnce: true }, reject);
     });
     const data = snapshot.val();
 
-    // Check if the 'online' status has changed
-    if (data && data.online !== lastOnlineStatus) {
-      // Update the last known online status
-      lastOnlineStatus = data.online;
+    if (data && data.device1.online !== lastOnlineStatus) {
+      lastOnlineStatus = data.device1.online;
 
-      // Get current date and time in Colombo
       const currentDateTime = moment().tz("Asia/Colombo").format();
 
       const responseData = {
         data,
         timestamp: currentDateTime,
       };
+      units = data.device1.senergy;
 
-      // Add the data to the array
-      dataArray.push(responseData);
-
-      // Ensure the array has at most 1000 elements
-      if (dataArray.length > 1000) {
-        dataArray.shift(); // Remove the oldest element
+      // Select the column based on the units range
+      let colIndex;
+      if (units >= 0 && units <= 30) {
+        colIndex = 0;
+      } else if (units >= 31 && units <= 60) {
+        colIndex = 1;
+      } else if (units >= 61 && units <= 90) {
+        colIndex = 2;
+      } else if (units >= 91 && units <= 120) {
+        colIndex = 3;
+      } else {
+        colIndex = 4;
       }
 
-      // console.log(responseData);
+      // Ensure tableData has valid numbers for calculation
+      const basePrice = Number(tableData[0][colIndex]);
+      const additionalPrice = units * Number(tableData[1][colIndex]);
+      if (isNaN(basePrice) || isNaN(additionalPrice)) {
+        console.error("Invalid base or additional price for calculation");
+        return;
+      }
+
+      const price = basePrice + additionalPrice;
+      console.log("Calculated price:", price);
+
+      // Send mock data to Firebase
+      const mockPath = "cost";
+      const mockData = {
+        price: price,
+      };
+
+      await set(ref(database, mockPath), mockData); // Send mock data to Firebase
+
+      dataArray.push(responseData);
+
+      if (dataArray.length > 1000) {
+        dataArray.shift();
+      }
     }
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 };
 
-// Fetch data every second
 setInterval(fetchData, 1000);
 
-// Define a route to fetch data and return the latest entry
 app.get("/data", async (req, res) => {
   try {
     const dbRef = ref(database);
     const snapshot = await new Promise((resolve, reject) => {
-      onValue(dbRef, resolve, { onlyOnce: true }, reject); // Listen for changes and resolve the promise
+      onValue(dbRef, resolve, { onlyOnce: true }, reject);
     });
     const data = snapshot.val();
 
-    // Get current date and time in Colombo
     const currentDateTime = moment().tz("Asia/Colombo").format();
 
     const responseData = {
@@ -86,37 +111,149 @@ app.get("/data", async (req, res) => {
     };
 
     res.json(responseData);
-    console.log(responseData);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Define a route to fetch the stored dataset
 app.get("/dataset", (req, res) => {
   res.json(dataArray);
 });
 
-// Endpoint to handle POST requests
-app.post("/cost", (req, res) => {
-  const { data1, data2 } = req.body;
+app.post("/setCost", (req, res) => {
+  const { data } = req.body;
 
-  // Log received data
-  console.log("Received data:", { data1, data2 });
+  console.log("Received data to set:", data);
 
-  // Calculate some result based on data1 and data2
-  const result = Number(data1) + Number(data2);
+  tableData = data; // Update global tableData
 
-  // Log the calculated result
+  res.json({ success: true, message: "Cost data updated successfully" });
+});
+
+// Modified /getCost API
+app.get("/getCost", (req, res) => {
+  if (!tableData || tableData.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Cost data not set" });
+  }
+
+  let colIndex;
+  if (units >= 0 && units <= 30) {
+    colIndex = 0;
+  } else if (units >= 31 && units <= 60) {
+    colIndex = 1;
+  } else if (units >= 61 && units <= 90) {
+    colIndex = 2;
+  } else if (units >= 91 && units <= 120) {
+    colIndex = 3;
+  } else {
+    colIndex = 4;
+  }
+
+  const result =
+    Number(tableData[0][colIndex]) + units * Number(tableData[1][colIndex]);
+
   console.log("Calculated result:", result);
 
-  // Respond with the result
   res.json({ success: true, result });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3002;
+// Endpoint to get global table data
+app.get("/globalData", (req, res) => {
+  res.json({ tableData });
+});
+
+// Endpoint to get the data in tableData
+app.get("/testCost", (req, res) => {
+  res.json({ tableData });
+});
+
+// New endpoint to set value
+app.post("/setValue", async (req, res) => {
+  const { value } = req.body;
+
+  console.log(typeof value);
+
+  try {
+    const valuePath = "set/val"; // Update this path as necessary
+    await set(ref(database, valuePath), parseFloat(value));
+
+    res.json({ success: true, message: "Value updated successfully" });
+    console.log(value);
+  } catch (error) {
+    console.error("Error setting value:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+=======
+    try {
+      const response = await fetch('https://power-control-backend.onrender.com/setCost', {
+      // const response = await fetch('http://localhost:3002/setCost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      setResponse(result); // Store server response
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <Container>
+      <h1>SuprAdmin</h1>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group as={Row} className="mb-3" controlId="formData1">
+          <Form.Label column sm="2">
+            Data 1
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data1} 
+              onChange={handleData1Change} 
+              placeholder="Enter Data 1" 
+            />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="formData2">
+          <Form.Label column sm="2">
+            Data 2
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control 
+              type="text" 
+              value={data2} 
+              onChange={handleData2Change} 
+              placeholder="Enter Data 2" 
+            />
+          </Col>
+        </Form.Group>
+
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
+
+      {response && (
+        <div>
+          <h2>Server Response:</h2>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+    </Container>
+  );
+}
+>>>>>>> main
