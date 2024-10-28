@@ -31,3 +31,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+        // "http://localhost:3002/setCost",

@@ -21,24 +21,14 @@ export default function SuprAdmin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Extract data1 and data2 from the data array
-    const [data1Array, data2Array] = data;
-
-    const payload = {
-      data1: data1Array[0],
-      data2: data2Array[0],
-    };
+    const payload = { data };
 
     try {
-      const response = await fetch(
-        "http://localhost:3002/setCost",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch("http://localhost:3002/setCost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const result = await response.json();
       setResponse(result); // Store server response
@@ -53,9 +43,7 @@ export default function SuprAdmin() {
 
   const fetchCost = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3002/getCost"
-      );
+      const response = await fetch("http://localhost:3002/getCost");
       const result = await response.json();
       setCost(result); // Store fetched cost
     } catch (error) {
@@ -65,9 +53,7 @@ export default function SuprAdmin() {
 
   const fetchTableData = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3002/testCost"
-      );
+      const response = await fetch("http://localhost:3002/testCost");
       const result = await response.json();
       setTableData(result.tableData); // Store fetched table data
 
@@ -82,10 +68,6 @@ export default function SuprAdmin() {
     }
   };
 
-  const handleBackButtonClick = () => {
-    window.location.reload(); // Reload the page
-  };
-
   useEffect(() => {
     // Fetch cost and table data on component mount
     fetchCost();
@@ -97,25 +79,16 @@ export default function SuprAdmin() {
       <div className="pt-5">
         <Container>
           <div className="customCard p-5 ">
-            <h4 className="title pt-3">Smart Energy Meter</h4>
+            <h4 className="title pt-3">Power Control</h4>
             <h1 className="title">Super Admin</h1>
             <p className="subtitle mb-4">
               Change charges for Power Usage to calculate monthly bill
             </p>
-            <Button
-              variant="secondary"
-              className="mb-3"
-              onClick={handleBackButtonClick}
-            >
-              Logout
-            </Button>
             <Form onSubmit={handleSubmit}>
               <Table bordered>
                 <thead>
                   <tr>
-                    <th style={{ width: "20%" }} className="tableBack">
-                      Tariff Block
-                    </th>{" "}
+                    <th style={{ width: "20%" }} className="tableBack"></th>{" "}
                     {/* Adjusted width */}
                     <th className="tableBack2">0 - 30</th>
                     <th className="tableBack2">31 - 60</th>
@@ -127,7 +100,7 @@ export default function SuprAdmin() {
                 <tbody>
                   <tr>
                     <td className="tableBack">
-                      <b>Fixed Charge (Rs.)</b>
+                      <b>Basic Charge</b>
                     </td>
                     {data[0].map((cell, colIndex) => (
                       <td key={colIndex}>
@@ -144,7 +117,7 @@ export default function SuprAdmin() {
                   </tr>
                   <tr>
                     <td className="tableBack">
-                      <b>Unit Rate (Rs.)</b>
+                      <b>Unit Price</b>
                     </td>
                     {data[1].map((cell, colIndex) => (
                       <td key={colIndex}>
@@ -169,6 +142,20 @@ export default function SuprAdmin() {
                 Save Changes
               </Button>
             </Form>
+
+            {response && (
+              <div>
+                <h2>Server Response:</h2>
+                <pre>{JSON.stringify(response, null, 2)}</pre>
+              </div>
+            )}
+
+            {cost && (
+              <div>
+                <h2>Cost Data:</h2>
+                <pre>{JSON.stringify(cost, null, 2)}</pre>
+              </div>
+            )}
           </div>
         </Container>
       </div>
