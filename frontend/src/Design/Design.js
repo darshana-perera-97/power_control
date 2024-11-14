@@ -65,8 +65,8 @@ const Design = () => {
             ? "Grid Power Available"
             : "Grid Power Lost"
         );
-        setDeviceStatus(result.state ? "Online" : "Offline");
-        // setDeviceStatus("result.state");
+        // setDeviceStatus(result.state ? "Online" : "Offline");
+        setDeviceStatus(result.state);
         // setDeviceStatus(result.state);
         setTgas(
           result.data.device1.gasState > 84 ? "Gas Emission" : "No Gas Emission"
