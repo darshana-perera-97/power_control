@@ -1,5 +1,6 @@
 const config = {
-  apiUrl: "http://localhost:3010/",
+  apiUrl: "http://108.181.199.62:3013/",
+  // apiUrl: "http://localhost:3013/",
   //   apiUrl: "http://localhost:3010/",
 };
 
