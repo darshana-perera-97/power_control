@@ -46,7 +46,7 @@ const Design = () => {
         setCost("Rs." + result.data.cost.price.toFixed(2));
         setlkr(result.data.cost.price.toFixed(2));
         setTgas(
-          result.data.device1.gasState > 80 ? "Gas Emission" : "No Gas Emission"
+          result.data.device1.gasState > 150 ? "Gas Emission" : "No Gas Emission"
         );
         setCurrent(result.data.device1.scurrent + " A");
         setspf(result.data.device1.spf);
@@ -279,7 +279,7 @@ const Design = () => {
                             <tr>
                               <td className="title">Bill Period</td>
                               <td className="title">
-                                : From 2024-07-01 To 2024-07-31
+                                : From 2025-03-01 To 2025-04-01
                               </td>
                             </tr>
                             <tr>
