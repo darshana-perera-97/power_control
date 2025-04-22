@@ -37,6 +37,7 @@ export default function SuprAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      console.log(payload);
 
       const result = await response.json();
       setResponse(result); // Store server response
@@ -52,6 +53,7 @@ export default function SuprAdmin() {
   const fetchCost = async () => {
     try {
       const response = await fetch(`${config.apiUrl}getCost`);
+      if (!response.ok) throw new Error("Failed to fetch cost"); // Handle non-200 responses
       const result = await response.json();
       setCost(result); // Store fetched cost
     } catch (error) {
@@ -62,15 +64,20 @@ export default function SuprAdmin() {
   const fetchTableData = async () => {
     try {
       const response = await fetch(`${config.apiUrl}testCost`);
+      if (!response.ok) throw new Error("Failed to fetch table data"); // Handle non-200 responses
       const result = await response.json();
-      setTableData(result.tableData); // Store fetched table data
 
-      // Set initial values for the input fields based on tableData
-      const initialData = [
-        result.tableData[0].map((cell) => cell.toString()),
-        result.tableData[1].map((cell) => cell.toString()),
-      ];
-      setData(initialData);
+      if (result.tableData && result.tableData.length >= 2) {
+        // Set initial values for the input fields based on tableData
+        const initialData = [
+          result.tableData[0].map((cell) => cell.toString()),
+          result.tableData[1].map((cell) => cell.toString()),
+        ];
+        setData(initialData);
+        setTableData(result.tableData); // Store fetched table data
+      } else {
+        console.warn("Invalid tableData format:", result.tableData);
+      }
     } catch (error) {
       console.error("Error fetching table data:", error);
     }
