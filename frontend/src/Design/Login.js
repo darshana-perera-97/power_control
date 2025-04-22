@@ -71,7 +71,7 @@ export default function Login() {
                       <p className="text-center mt-2 opacity-50">
                         {" "}
                         <small className="text-center">
-                          &copy; 2024 Your Company
+                          &copy; 2025 Your Company
                         </small>
                       </p>
                     </form>
