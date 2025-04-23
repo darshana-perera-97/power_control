@@ -314,7 +314,7 @@ const Design = () => {
                             </tr>
                             <tr>
                               <td className="title">Payment Due Date</td>
-                              <td className="title">: 2024-08-22</td>
+                              <td className="title">: 2025-04-06</td>
                             </tr>
                             {/* Add more rows as needed */}
                           </tbody>
